@@ -1,8 +1,7 @@
 # UASF - Universal Agent System Format
 ###### *Previously Named - (MoE-AC)Mastery-of-Expert-Agent-Creation*
 
-this repository serves as a sharepoint for my workflow in creating speacialized agents
-which i decided to also call MoE Agents aka 'Mastery Of Expert Agent Creation'. The workflow is quite simple and infact provides a near perfect end product for one shot instructions. you may have to cut off the changelog or request the model producing
+this repository serves as a sharepoint for my workflow in creating Universal Agents. This workflow (previously called MoE Agents aka 'Mastery Of Expert Agent Creation'), is ideal for creating agents for a targeted Model Providor or for any Model Provider. The workflow is quite simple and infact provides a near perfect end product for one shot instructions. you may have to cut off the changelog or request the model producing
 the instructions to provide a leaner output with the following prompt:
 
 **"Export copy ready portion of output file only. do not include changelog"**
@@ -24,7 +23,7 @@ please be sure to use this responsibly.
 
 At this point the model should generate a complete and UASF Formatted Agent File. Use this for the Provider of your choice.
 
-----------------------------------------------------------------------------
+---
 
 ### Example Files:
 
@@ -33,3 +32,9 @@ At this point the model should generate a complete and UASF Formatted Agent File
 ##### *Mistral_Studio_Agent - CopyCopy_Mistral_LeLawyer* 
 ##### *Mistral_Studio_Agent - Doc_Mistral_MD* 
 
+***
+
+### Future Updates:
+
+##### 1. Script setup with 4B Model for full suite creation
+##### 2. GUI with Logging and Agent Portfolio for Suite
