@@ -1,0 +1,429 @@
+jason@14900kf:~$ podman ps -a
+CONTAINER ID  IMAGE                              COMMAND           CREATED       STATUS                   PORTS                                                                   NAMES
+f621e931c425  docker.io/xbrowsersync/api:latest  node dist/api.js  45 hours ago  Exited (1) 44 hours ago  0.0.0.0:6000->6000/tcp, 8080/tcp                                        xbrowsersync-api
+3513e99d193a  localhost/librechat-cuda:13.2                        6 hours ago   Up 6 hours               0.0.0.0:3080->3080/tcp, 0.0.0.0:7860->7860/tcp, 0.0.0.0:8081->8080/tcp  librechat
+jason@14900kf:~$ ^C
+jason@14900kf:~$ podman images
+REPOSITORY                        TAG                       IMAGE ID      CREATED      SIZE
+localhost/librechat-cuda          13.2                      ca5ae916e0ee  2 days ago   27.4 GB
+<none>                            <none>                    99c99971c7d0  2 days ago   16.5 GB
+<none>                            <none>                    da16b585919b  2 days ago   27.4 GB
+<none>                            <none>                    f3d2e372e3a4  3 days ago   2.69 GB
+<none>                            <none>                    ec46cc6c19f1  3 days ago   7.9 GB
+<none>                            <none>                    2248c27dd862  3 days ago   18.5 GB
+docker.io/library/node            20-bookworm-slim          9da6b4e352d0  7 days ago   205 MB
+docker.io/nvidia/cuda             13.2.1-devel-ubuntu24.04  2b77a29b248b  12 days ago  7.1 GB
+docker.io/portainer/portainer-ce  lts                       c687e3efcb24  5 weeks ago  181 MB
+docker.io/xbrowsersync/api        latest                    4ca95316a19f  5 years ago  155 MB
+jason@14900kf:~$ podman rmi portainer/portainer-ee:lts
+Error: portainer/portainer-ee:lts: image not known
+jason@14900kf:~$ podman rmi portainer/portainer-ce:lts
+Untagged: docker.io/portainer/portainer-ce:lts
+Deleted: c687e3efcb24406d417d137b2bd88690db11a8498b4576c8565854761b741c3c
+jason@14900kf:~$ systemctl --user status podman.socket
+○ podman.socket - Podman API Socket
+     Loaded: loaded (/usr/lib/systemd/user/podman.socket; disabled; preset: enabled)
+     Active: inactive (dead)
+   Triggers: ● podman.service
+       Docs: man:podman-system-service(1)
+     Listen: /run/user/1000/podman/podman.sock (Stream)
+jason@14900kf:~$ systemctl --user enable --now podman.socket
+Created symlink '/home/jason/.config/systemd/user/sockets.target.wants/podman.socket' → '/usr/lib/systemd/user/podman.socket'.
+jason@14900kf:~$ systemctl --user status podman.socket
+● podman.socket - Podman API Socket
+     Loaded: loaded (/usr/lib/systemd/user/podman.socket; enabled; preset: enabled)
+     Active: active (listening) since Wed 2026-04-29 20:07:34 EDT; 18s ago
+ Invocation: ad6f918647b04f65886d9624715cfe26
+   Triggers: ● podman.service
+       Docs: man:podman-system-service(1)
+     Listen: /run/user/1000/podman/podman.sock (Stream)
+     CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/podman.socket
+
+Apr 29 20:07:34 14900kf systemd[3862]: Listening on podman.socket - Podman API Socket.
+jason@14900kf:~$ ls -l /run/podman/podman.sock
+ls: cannot open file '/run/podman/podman.sock': Permission denied
+jason@14900kf:~$ sudo ls -l /run/podman/podman.sock
+[sudo: authenticate] Password: 
+srw-rw---- 1 root root 0 Apr 29 02:53 /run/podman/podman.sock
+jason@14900kf:~$ systemctl --user status podman.socket
+● podman.socket - Podman API Socket
+     Loaded: loaded (/usr/lib/systemd/user/podman.socket; enabled; preset: enabled)
+     Active: active (listening) since Wed 2026-04-29 20:07:34 EDT; 48s ago
+ Invocation: ad6f918647b04f65886d9624715cfe26
+   Triggers: ● podman.service
+       Docs: man:podman-system-service(1)
+     Listen: /run/user/1000/podman/podman.sock (Stream)
+     CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/podman.socket
+
+Apr 29 20:07:34 14900kf systemd[3862]: Listening on podman.socket - Podman API Socket.
+jason@14900kf:~$ sudo systemctl --user status podman.socket
+Failed to connect to user scope bus via local transport: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined (consider using --machine=<user>@.host --user to connect to bus of other user)
+jason@14900kf:~$ systemctl --user status podman.socket
+● podman.socket - Podman API Socket
+     Loaded: loaded (/usr/lib/systemd/user/podman.socket; enabled; preset: enabled)
+     Active: active (listening) since Wed 2026-04-29 20:07:34 EDT; 1min 6s ago
+ Invocation: ad6f918647b04f65886d9624715cfe26
+   Triggers: ● podman.service
+       Docs: man:podman-system-service(1)
+     Listen: /run/user/1000/podman/podman.sock (Stream)
+     CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/podman.socket
+
+Apr 29 20:07:34 14900kf systemd[3862]: Listening on podman.socket - Podman API Socket.
+jason@14900kf:~$ 
+jason@14900kf:~$ 
+jason@14900kf:~$ 
+jason@14900kf:~$ ss -tulnp | grep 9443
+tcp   LISTEN 0      4096                               0.0.0.0:9443       0.0.0.0:*                                               
+jason@14900kf:~$ podman run -d \
+  -p 9443:9443 \
+  --name portainer \
+  --privileged \
+  -v /run/podman/podman.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  portainer/portainer-ce:lts
+Error: short-name "portainer/portainer-ce:lts" did not resolve to an alias and no unqualified-search registries are defined in "/etc/containers/registries.conf"
+jason@14900kf:~$ podman run -d   -p 9443:9443   --name portainer   --privileged   -v /run/podman/podman.sock:/var/run/docker.sock   -v portainer_data:/data   portainer/portainer-ee:lts
+Error: short-name "portainer/portainer-ee:lts" did not resolve to an alias and no unqualified-search registries are defined in "/etc/containers/registries.conf"
+jason@14900kf:~$ sudo kill -9 $(sudo lsof -t -i:9443)
+jason@14900kf:~$ cat /etc/containers/registries.conf
+# For more information on this configuration file, see containers-registries.conf(5).
+#
+# NOTE: RISK OF USING UNQUALIFIED IMAGE NAMES
+# We recommend always using fully qualified image names including the registry
+# server (full dns name), namespace, image name, and tag
+# (e.g., registry.redhat.io/ubi8/ubi:latest). Pulling by digest (i.e.,
+# quay.io/repository/name@digest) further eliminates the ambiguity of tags.
+# When using short names, there is always an inherent risk that the image being
+# pulled could be spoofed. For example, a user wants to pull an image named
+# `foobar` from a registry and expects it to come from myregistry.com. If
+# myregistry.com is not first in the search list, an attacker could place a
+# different `foobar` image at a registry earlier in the search list. The user
+# would accidentally pull and run the attacker's image and code rather than the
+# intended content. We recommend only adding registries which are completely
+# trusted (i.e., registries which don't allow unknown or anonymous users to
+# create accounts with arbitrary names). This will prevent an image from being
+# spoofed, squatted or otherwise made insecure.  If it is necessary to use one
+# of these registries, it should be added at the end of the list.
+#
+# # An array of host[:port] registries to try when pulling an unqualified image, in order.
+# unqualified-search-registries = ["example.com"]
+#
+# [[registry]]
+# # The "prefix" field is used to choose the relevant [[registry]] TOML table;
+# # (only) the TOML table with the longest match for the input image name
+# # (taking into account namespace/repo/tag/digest separators) is used.
+# #
+# # The prefix can also be of the form: *.example.com for wildcard subdomain
+# # matching.
+# #
+# # If the prefix field is missing, it defaults to be the same as the "location" field.
+# prefix = "example.com/foo"
+#
+# # If true, unencrypted HTTP as well as TLS connections with untrusted
+# # certificates are allowed.
+# insecure = false
+#
+# # If true, pulling images with matching names is forbidden.
+# blocked = false
+#
+# # The physical location of the "prefix"-rooted namespace.
+# #
+# # By default, this is equal to "prefix" (in which case "prefix" can be omitted
+# # and the [[registry]] TOML table can only specify "location").
+# #
+# # Example: Given
+# #   prefix = "example.com/foo"
+# #   location = "internal-registry-for-example.com/bar"
+# # requests for the image example.com/foo/myimage:latest will actually work with the
+# # internal-registry-for-example.com/bar/myimage:latest image.
+#
+# # The location can be empty if prefix is in a
+# # wildcarded format: "*.example.com". In this case, the input reference will
+# # be used as-is without any rewrite.
+# location = internal-registry-for-example.com/bar"
+#
+# # (Possibly-partial) mirrors for the "prefix"-rooted namespace.
+# #
+# # The mirrors are attempted in the specified order; the first one that can be
+# # contacted and contains the image will be used (and if none of the mirrors contains the image,
+# # the primary location specified by the "registry.location" field, or using the unmodified
+# # user-specified reference, is tried last).
+# #
+# # Each TOML table in the "mirror" array can contain the following fields, with the same semantics
+# # as if specified in the [[registry]] TOML table directly:
+# # - location
+# # - insecure
+# [[registry.mirror]]
+# location = "example-mirror-0.local/mirror-for-foo"
+# [[registry.mirror]]
+# location = "example-mirror-1.local/mirrors/foo"
+# insecure = true
+# # Given the above, a pull of example.com/foo/image:latest will try:
+# # 1. example-mirror-0.local/mirror-for-foo/image:latest
+# # 2. example-mirror-1.local/mirrors/foo/image:latest
+# # 3. internal-registry-for-example.com/bar/image:latest
+# # in order, and use the first one that exists.
+jason@14900kf:~$ echo 'unqualified-search-registries = ["docker.io"]' | sudo tee -a /etc/containers/registries.conf
+unqualified-search-registries = ["docker.io"]
+jason@14900kf:~$ systemctl --user restart podman
+jason@14900kf:~$ podman run -d \
+  -p 9443:9443 \
+  --name portainer \
+  --privileged \
+  -v /run/podman/podman.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  docker.io/portainer/portainer-ce:lts
+Trying to pull docker.io/portainer/portainer-ce:lts...
+Getting image source signatures
+Copying blob 1c4fea3af7a0 done   | 
+Copying blob c7e34731674e done   | 
+Copying blob 2ff62971c2fb done   | 
+Copying blob d1e89ff9b379 done   | 
+Copying blob 9ab41045230a done   | 
+Copying blob 70636407b8c2 done   | 
+Copying blob 224552a17e45 done   | 
+Copying blob 4f4fb700ef54 skipped: already exists  
+Copying config c687e3efcb done   | 
+Writing manifest to image destination
+Error: statfs /run/podman/podman.sock: permission denied
+jason@14900kf:~$ systemctl --user status podman.socket
+● podman.socket - Podman API Socket
+     Loaded: loaded (/usr/lib/systemd/user/podman.socket; enabled; preset: enabled)
+     Active: active (listening) since Wed 2026-04-29 20:07:34 EDT; 10min ago
+ Invocation: ad6f918647b04f65886d9624715cfe26
+   Triggers: ● podman.service
+       Docs: man:podman-system-service(1)
+     Listen: /run/user/1000/podman/podman.sock (Stream)
+     CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/podman.socket
+
+Apr 29 20:07:34 14900kf systemd[3862]: Listening on podman.socket - Podman API Socket.
+jason@14900kf:~$ sudo kill -9 $(sudo lsof -t -i:9443)
+
+Usage:
+ kill [options] <pid> [...]
+
+Options:
+ <pid> [...]            send signal to every <pid> listed
+ -<signal>, -s, --signal <signal>
+                        specify the <signal> to be sent
+ -q, --queue <value>    integer value to be sent with the signal
+ -l, --list=[<signal>]  list all signal names, or convert one to a name
+ -L, --table            list all signal names in a nice table
+
+ -h, --help     display this help and exit
+ -V, --version  output version information and exit
+
+For more details see kill(1).
+jason@14900kf:~$ podman stop portainer && podman rm portainer
+Error: no container with name or ID "portainer" found: no such container
+jason@14900kf:~$ podman rmi docker.io/portainer/portainer-ce:lts
+Untagged: docker.io/portainer/portainer-ce:lts
+Deleted: c687e3efcb24406d417d137b2bd88690db11a8498b4576c8565854761b741c3c
+jason@14900kf:~$ systemctl --user enable --now podman.socket
+jason@14900kf:~$ ls -l /run/podman/podman.sock
+ls: cannot open file '/run/podman/podman.sock': Permission denied
+jason@14900kf:~$ ls -ld /run/podman
+drwx------ 2 root root 100 Apr 29 02:53 /run/podman
+jason@14900kf:~$ sudo ls -l /run/podman/podman.sock
+srw-rw---- 1 root root 0 Apr 29 02:53 /run/podman/podman.sock
+jason@14900kf:~$ systemctl --user enable --now podman.socket
+jason@14900kf:~$ ^C
+jason@14900kf:~$ systemctl --user status podman.socket
+● podman.socket - Podman API Socket
+     Loaded: loaded (/usr/lib/systemd/user/podman.socket; enabled; preset: enabled)
+     Active: active (listening) since Wed 2026-04-29 20:07:34 EDT; 12min ago
+ Invocation: ad6f918647b04f65886d9624715cfe26
+   Triggers: ● podman.service
+       Docs: man:podman-system-service(1)
+     Listen: /run/user/1000/podman/podman.sock (Stream)
+     CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/podman.socket
+
+Apr 29 20:07:34 14900kf systemd[3862]: Listening on podman.socket - Podman API Socket.
+jason@14900kf:~$ ls -l $XDG_RUNTIME_DIR/podman/podman.sock
+srw-rw---- 1 jason jason 0 Apr 29 20:07 /run/user/1000/podman/podman.sock
+jason@14900kf:~$ podman run -d \
+  -p 9443:9443 \
+  --name portainer \
+  --privileged \
+  -v $XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  docker.io/portainer/portainer-ce:lts
+
+
+
+Trying to pull docker.io/portainer/portainer-ce:lts...
+Getting image source signatures
+Copying blob 1c4fea3af7a0 done   | 
+Copying blob c7e34731674e done   | 
+Copying blob 2ff62971c2fb done   | 
+Copying blob 9ab41045230a done   | 
+Copying blob d1e89ff9b379 done   | 
+Copying blob 70636407b8c2 done   | 
+Copying blob 224552a17e45 done   | 
+Copying blob 4f4fb700ef54 skipped: already exists  
+Copying config c687e3efcb done   | 
+Writing manifest to image destination
+1cb9df40cb3b780b37e4ec43114d7d365bf99c237f3a0f246eb25bb7ee21ebb9
+jason@14900kf:~$ podman ps
+CONTAINER ID  IMAGE                                 COMMAND     CREATED         STATUS         PORTS                                                                   NAMES
+3513e99d193a  localhost/librechat-cuda:13.2                     7 hours ago     Up 7 hours     0.0.0.0:3080->3080/tcp, 0.0.0.0:7860->7860/tcp, 0.0.0.0:8081->8080/tcp  librechat
+1cb9df40cb3b  docker.io/portainer/portainer-ce:lts              11 seconds ago  Up 11 seconds  0.0.0.0:9443->9443/tcp, 8000/tcp, 9000/tcp                              portainer
+jason@14900kf:~$ echo "Access Portainer UI at: https://localhost:9443"
+Access Portainer UI at: https://localhost:9443
+jason@14900kf:~$ podman ps -a
+CONTAINER ID  IMAGE                                 COMMAND           CREATED             STATUS                   PORTS                                                                   NAMES
+f621e931c425  docker.io/xbrowsersync/api:latest     node dist/api.js  45 hours ago        Exited (1) 45 hours ago  0.0.0.0:6000->6000/tcp, 8080/tcp                                        xbrowsersync-api
+3513e99d193a  localhost/librechat-cuda:13.2                           7 hours ago         Up 7 hours               0.0.0.0:3080->3080/tcp, 0.0.0.0:7860->7860/tcp, 0.0.0.0:8081->8080/tcp  librechat
+1cb9df40cb3b  docker.io/portainer/portainer-ce:lts                    About a minute ago  Up About a minute        0.0.0.0:9443->9443/tcp, 8000/tcp, 9000/tcp                              portainer
+jason@14900kf:~$ podman restart portainer
+Error: pasta failed with exit code 1:
+Failed to bind port 9443 (Address already in use) for option '-t 9443-9443:9443-9443'
+
+jason@14900kf:~$ podman restart portainer
+portainer
+jason@14900kf:~$ ss -tulnp | grep 9443
+tcp   LISTEN 0      128                                0.0.0.0:9443       0.0.0.0:*    users:(("pasta.avx2",pid=1684869,fd=6))    
+jason@14900kf:~$ pasta
+root@pasta-14900kf:~# which pasta
+/usr/bin/pasta
+root@pasta-14900kf:~# whatis pasta
+pasta (1)            - Unprivileged user-mode network connectivity for network namespaces
+root@pasta-14900kf:~# whereis pasta
+pasta: /usr/bin/pasta /usr/share/man/man1/pasta.1.gz
+root@pasta-14900kf:~# whois pasta
+Command 'whois' not found, but can be installed with:
+apt install whois
+root@pasta-14900kf:~# sudo lsof -i :9443
+sudo-rs: invalid configuration: Permission denied (os error 13)
+root@pasta-14900kf:~# lsof -i :9443
+root@pasta-14900kf:~# exit
+logout
+jason@14900kf:~$ sudo lsof -i :9443
+COMMAND       PID  USER FD   TYPE   DEVICE SIZE/OFF NODE NAME
+pasta.avx 1684869 jason  6u  IPv4 42163990      0t0  TCP *:9443 (LISTEN)
+chrome    3624294 jason 35u  IPv4 42059979      0t0  TCP localhost:48914->localhost:9443 (ESTABLISHED)
+chrome    3624294 jason 44u  IPv4 42071954      0t0  TCP localhost:48964->localhost:9443 (ESTABLISHED)
+chrome    3624294 jason 52u  IPv4 42071956      0t0  TCP localhost:48970->localhost:9443 (ESTABLISHED)
+jason@14900kf:~$ which pasta \
+> whatis pasta
+/usr/bin/pasta
+/usr/bin/whatis
+/usr/bin/pasta
+jason@14900kf:~$ ^C
+jason@14900kf:~$ which pasta
+/usr/bin/pasta
+jason@14900kf:~$ whatispasta
+whatispasta: command not found
+jason@14900kf:~$ whatis pasta
+pasta (1)            - Unprivileged user-mode network connectivity for network namespaces
+jason@14900kf:~$ podman run -d   -p 9000:9000   --name portainer   --privileged   -v $XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock   -v portainer_data:/data   docker.io/portainer/portainer-ce:lts
+Error: creating container storage: the container name "portainer" is already in use by 1cb9df40cb3b780b37e4ec43114d7d365bf99c237f3a0f246eb25bb7ee21ebb9. You have to remove that container to be able to reuse that name: that name is already in use, or use --replace to instruct Podman to do so.
+jason@14900kf:~$ sudo nano /etc/containers/containers.conf
+jason@14900kf:~$ podman stop portainer && podman rm portainer
+portainer
+portainer
+jason@14900kf:~$ podman rmi docker.io/portainer/portainer-ce:lts
+Untagged: docker.io/portainer/portainer-ce:lts
+Deleted: c687e3efcb24406d417d137b2bd88690db11a8498b4576c8565854761b741c3c
+jason@14900kf:~$ podman run -d   -p 9000:9000   --name portainer   --privileged   -v $XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock   -v portainer_data:/data   docker.io/portainer/portainer-ce:lts
+Trying to pull docker.io/portainer/portainer-ce:lts...
+Getting image source signatures
+Copying blob 1c4fea3af7a0 done   | 
+Copying blob c7e34731674e done   | 
+Copying blob d1e89ff9b379 done   | 
+Copying blob 2ff62971c2fb done   | 
+Copying blob 70636407b8c2 done   | 
+Copying blob 9ab41045230a done   | 
+Copying blob 224552a17e45 done   | 
+Copying blob 4f4fb700ef54 skipped: already exists  
+Copying config c687e3efcb done   | 
+Writing manifest to image destination
+Error: pasta failed with exit code 1:
+Failed to bind port 9000 (Address already in use) for option '-t 9000-9000:9000-9000'
+
+jason@14900kf:~$ podman stop portainer && podman rm portainer
+portainer
+portainer
+jason@14900kf:~$ podman rmi docker.io/portainer/portainer-ce:lts
+Untagged: docker.io/portainer/portainer-ce:lts
+Deleted: c687e3efcb24406d417d137b2bd88690db11a8498b4576c8565854761b741c3c
+jason@14900kf:~$ podman run -d   -p 9444:9444   --name portainer   --privileged   -v $XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock   -v portainer_data:/data   docker.io/portainer/portainer-ce:lts
+Trying to pull docker.io/portainer/portainer-ce:lts...
+Getting image source signatures
+Copying blob 1c4fea3af7a0 done   | 
+Copying blob c7e34731674e done   | 
+Copying blob 2ff62971c2fb done   | 
+Copying blob 70636407b8c2 done   | 
+Copying blob d1e89ff9b379 done   | 
+Copying blob 9ab41045230a done   | 
+Copying blob 224552a17e45 done   | 
+Copying blob 4f4fb700ef54 skipped: already exists  
+Copying config c687e3efcb done   | 
+Writing manifest to image destination
+6e60644c4e26fa393c9fc59e766fa0944f43f883a048cdba9973dd408d5aa3d8
+jason@14900kf:~$ ss -tulnp | grep 9444
+tcp   LISTEN 0      128                                0.0.0.0:9444       0.0.0.0:*    users:(("pasta.avx2",pid=1760906,fd=6))    
+jason@14900kf:~$ docker port pasta
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+Error: no container with name or ID "pasta" found: no such container
+jason@14900kf:~$ ss -tulnp | grep pasta
+tcp   LISTEN 0      128                                0.0.0.0:8081       0.0.0.0:*    users:(("pasta.avx2",pid=3667869,fd=8))    
+tcp   LISTEN 0      128                                0.0.0.0:7860       0.0.0.0:*    users:(("pasta.avx2",pid=3667869,fd=7))    
+tcp   LISTEN 0      128                                0.0.0.0:3080       0.0.0.0:*    users:(("pasta.avx2",pid=3667869,fd=6))    
+tcp   LISTEN 0      128                                0.0.0.0:9444       0.0.0.0:*    users:(("pasta.avx2",pid=1760906,fd=6))    
+jason@14900kf:~$ podman ps -a
+CONTAINER ID  IMAGE                                 COMMAND           CREATED        STATUS                   PORTS                                                                   NAMES
+f621e931c425  docker.io/xbrowsersync/api:latest     node dist/api.js  45 hours ago   Exited (1) 45 hours ago  0.0.0.0:6000->6000/tcp, 8080/tcp                                        xbrowsersync-api
+3513e99d193a  localhost/librechat-cuda:13.2                           7 hours ago    Up 7 hours               0.0.0.0:3080->3080/tcp, 0.0.0.0:7860->7860/tcp, 0.0.0.0:8081->8080/tcp  librechat
+6e60644c4e26  docker.io/portainer/portainer-ce:lts                    3 minutes ago  Up 3 minutes             0.0.0.0:9444->9444/tcp, 8000/tcp, 9000/tcp, 9443/tcp                    portainer
+jason@14900kf:~$ podman inspect $(podman ps -q) | grep -i pasta
+               "NetworkMode": "pasta",
+               "NetworkMode": "pasta",
+jason@14900kf:~$ cat /etc/containers/containers.conf | grep -i pasta
+cat: /etc/containers/containers.conf: No such file or directory (os error 2)
+jason@14900kf:~$ ps aux | grep pasta
+jason    1760906  0.0  0.0 206824 17152 ?        Ss   20:36   0:00 /usr/bin/pasta --config-net -t 9444-9444:9444-9444 --dns-forward 169.254.1.1 -u none -T none -U none --no-map-gw --quiet --netns /run/user/1000/netns/netns-9b68cb3a-689a-a0c3-84e6-8a3728d49c7b --map-guest-addr 169.254.1.2
+jason    1785883  0.0  0.0   9468  2528 pts/2    S+   20:40   0:00 grep --color=auto pasta
+jason    3667869  0.0  0.0 206820 17352 ?        Ss   13:49   0:01 /usr/bin/pasta --config-net -t 3080-3080:3080-3080 -t 7860-7860:7860-7860 -t 8081-8081:8080-8080 --dns-forward 169.254.1.1 -u none -T none -U none --no-map-gw --quiet --netns /run/user/1000/netns/netns-a4b0f9b6-1702-7957-be9f-c34db7180f3a --map-guest-addr 169.254.1.2
+jason@14900kf:~$ podman stop portainer && podman rm portainer
+portainer
+portainer
+jason@14900kf:~$ podman rmi docker.io/portainer/portainer-ce:lts
+Untagged: docker.io/portainer/portainer-ce:lts
+Deleted: c687e3efcb24406d417d137b2bd88690db11a8498b4576c8565854761b741c3c
+jason@14900kf:~$ podman rmi docker.io/portainer/portainer-ce:lts
+Error: docker.io/portainer/portainer-ce:lts: image not known
+jason@14900kf:~$ podman rmi docker.io/portainer/portainer-ee:lts
+Error: docker.io/portainer/portainer-ee:lts: image not known
+jason@14900kf:~$ sudo nano /etc/containers/containers.conf
+jason@14900kf:~$ ps aux | grep pasta
+jason    1800472  0.0  0.0   9468  2528 pts/2    S+   20:43   0:00 grep --color=auto pasta
+jason    3667869  0.0  0.0 206820 17352 ?        Ss   13:49   0:01 /usr/bin/pasta --config-net -t 3080-3080:3080-3080 -t 7860-7860:7860-7860 -t 8081-8081:8080-8080 --dns-forward 169.254.1.1 -u none -T none -U none --no-map-gw --quiet --netns /run/user/1000/netns/netns-a4b0f9b6-1702-7957-be9f-c34db7180f3a --map-guest-addr 169.254.1.2
+jason@14900kf:~$ ps aux | grep pasta
+jason    1802732  0.0  0.0   9468  2524 pts/2    S+   20:43   0:00 grep --color=auto pasta
+jason    3667869  0.0  0.0 206820 17352 ?        Ss   13:49   0:01 /usr/bin/pasta --config-net -t 3080-3080:3080-3080 -t 7860-7860:7860-7860 -t 8081-8081:8080-8080 --dns-forward 169.254.1.1 -u none -T none -U none --no-map-gw --quiet --netns /run/user/1000/netns/netns-a4b0f9b6-1702-7957-be9f-c34db7180f3a --map-guest-addr 169.254.1.2
+jason@14900kf:~$ podman run -d \
+  -p 9444:9443 \
+  --name portainer \
+  --privileged \
+  -v $XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  docker.io/portainer/portainer-ce:lts
+Trying to pull docker.io/portainer/portainer-ce:lts...
+Getting image source signatures
+Copying blob 1c4fea3af7a0 done   | 
+Copying blob d1e89ff9b379 done   | 
+Copying blob c7e34731674e done   | 
+Copying blob 2ff62971c2fb done   | 
+Copying blob 9ab41045230a done   | 
+Copying blob 70636407b8c2 done   | 
+Copying blob 224552a17e45 done   | 
+Copying blob 4f4fb700ef54 skipped: already exists  
+Copying config c687e3efcb done   | 
+Writing manifest to image destination
+38f67dab5f1ab1d7d399bdede5fe4fd68ffe884000612b4a8b8448fe3cd7dd44
+jason@14900kf:~$ ps aux | grep pasta
+jason    1806305  0.0  0.0 206820 16812 ?        Ss   20:44   0:00 /usr/bin/pasta --config-net -t 9444-9444:9443-9443 --dns-forward 169.254.1.1 -u none -T none -U none --no-map-gw --quiet --netns /run/user/1000/netns/netns-6cffb915-4cbf-6f69-ea11-b88054b3c392 --map-guest-addr 169.254.1.2
+jason    1807381  0.0  0.0   9468  2528 pts/2    S+   20:44   0:00 grep --color=auto pasta
+jason    3667869  0.0  0.0 206820 17352 ?        Ss   13:49   0:01 /usr/bin/pasta --config-net -t 3080-3080:3080-3080 -t 7860-7860:7860-7860 -t 8081-8081:8080-8080 --dns-forward 169.254.1.1 -u none -T none -U none --no-map-gw --quiet --netns /run/user/1000/netns/netns-a4b0f9b6-1702-7957-be9f-c34db7180f3a --map-guest-addr 169.254.1.2
+
