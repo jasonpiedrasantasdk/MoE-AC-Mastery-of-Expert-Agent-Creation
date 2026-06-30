@@ -1,0 +1,15 @@
+{
+  "name": "uasf-agent-architect",
+  "version": "1.0.0",
+  "description": "UASF v8 Agent Architect — converts rough specs into production-quality agent constitutions",
+  "author": "jasonpiedrasantasdk",
+  "license": "Unlicense",
+  "repository": "https://github.com/jasonpiedrasantasdk/UASF-Universal_Agent_System_Format",
+  "keywords": [
+    "uasf",
+    "agent-architect",
+    "agent-building",
+    "prompt-engineering",
+    "universal-agent-system"
+  ]
+}
