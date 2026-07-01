@@ -12,6 +12,16 @@ please be sure to use this responsibly.
 
 ### Option A(Recommended for Claude):
 
+**Skill (Claude Desktop / claude.ai — no subscription tier required):**
+
+1. Download [`skills/uasf-agent-architect/SKILL.md`](skills/uasf-agent-architect/SKILL.md) from this repo, or package the folder yourself into a `.skill` file
+2. Claude Desktop / claude.ai → Settings → Capabilities → Skills → Upload
+3. Enable it
+
+Once uploaded, just ask Claude to build/convert/upgrade an agent spec — it auto-triggers off intent, no slash command needed.
+
+**Claude Code Plugin (CLI or Desktop Code tab):**
+
 Add Git Repo to the Claude Marketplace Custom Plugins in the Desktop Client or with Claude Code:
 ```
 /plugin marketplace add jasonpiedrasantasdk/UASF-Universal_Agent_System_Format
